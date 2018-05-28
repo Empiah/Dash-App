@@ -8,7 +8,7 @@ app = dash.Dash()
 
 df = pd.read_csv('Data/london-stop-and-search.csv', low_memory=False)
 
-available_indicators = df['Indicator Name'].unique()
+available_indicators = df['object_of_search'].unique()
 
 app.layout = html.Div([
     html.Div([
