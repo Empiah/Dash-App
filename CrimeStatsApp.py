@@ -6,9 +6,16 @@ import plotly.graph_objs as go
 
 app = dash.Dash()
 
-df = pd.read_csv('Data/london-stop-and-search.csv', low_memory=False)
+df = pd.read_csv('Data/real_estate_db.csv', encoding='ISO-8859-1',index_col='UID')
 
-available_indicators = df['object_of_search'].unique()
+df = df[df.columns.drop(list(df.filter(regex='mean')))]
+df = df[df.columns.drop(list(df.filter(regex='rent_gt')))]
+df = df[df.columns.drop(list(df.filter(regex='sample')))]
+df = df[df.columns.drop(list(df.filter(regex='stdev')))]
+df.drop(['BLOCKID','COUNTYID','STATEID','SUMLEVEL'], axis=1, inplace=True)
+
+available_indicators = df['type'].unique()
+
 
 app.layout = html.Div([
     html.Div([
@@ -17,7 +24,7 @@ app.layout = html.Div([
             dcc.Dropdown(
                 id='crossfilter-xaxis-column',
                 options=[{'label': i, 'value': i} for i in available_indicators],
-                value='Fertility rate, total (births per woman)'
+                value='City'
             ),
             dcc.RadioItems(
                 id='crossfilter-xaxis-type',
@@ -32,7 +39,7 @@ app.layout = html.Div([
             dcc.Dropdown(
                 id='crossfilter-yaxis-column',
                 options=[{'label': i, 'value': i} for i in available_indicators],
-                value='Life expectancy at birth, total (years)'
+                value='Town'
             ),
             dcc.RadioItems(
                 id='crossfilter-yaxis-type',
@@ -60,11 +67,11 @@ app.layout = html.Div([
 
     html.Div(dcc.Slider(
         id='crossfilter-year--slider',
-        min=df['Year'].min(),
-        max=df['Year'].max(),
-        value=df['Year'].max(),
+        min=df['year'].min(),
+        max=df['year'].max(),
+        value=df['year'].max(),
         step=None,
-        marks={str(year): str(year) for year in df['Year'].unique()}
+        marks={str(year): str(year) for year in df['year'].unique()}
     ), style={'width': '49%', 'padding': '0px 20px 20px 20px'})
 ])
 
@@ -79,14 +86,14 @@ app.layout = html.Div([
 def update_graph(xaxis_column_name, yaxis_column_name,
                  xaxis_type, yaxis_type,
                  year_value):
-    dff = df[df['Year'] == year_value]
+    dff = df[df['year'] == year_value]
 
     return {
         'data': [go.Scatter(
-            x=dff[dff['Indicator Name'] == xaxis_column_name]['Value'],
-            y=dff[dff['Indicator Name'] == yaxis_column_name]['Value'],
-            text=dff[dff['Indicator Name'] == yaxis_column_name]['Country Name'],
-            customdata=dff[dff['Indicator Name'] == yaxis_column_name]['Country Name'],
+            x=dff[dff['object_of_search'] == xaxis_column_name]['Value'],
+            y=dff[dff['object_of_search'] == yaxis_column_name]['Value'],
+            text=dff[dff['object_of_search'] == yaxis_column_name]['Age'],
+            customdata=dff[dff['object_of_search'] == yaxis_column_name]['Age'],
             mode='markers',
             marker={
                 'size': 15,
@@ -113,7 +120,7 @@ def update_graph(xaxis_column_name, yaxis_column_name,
 def create_time_series(dff, axis_type, title):
     return {
         'data': [go.Scatter(
-            x=dff['Year'],
+            x=dff['year'],
             y=dff['Value'],
             mode='lines+markers'
         )],
