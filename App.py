@@ -4,8 +4,9 @@ import dash_html_components as html
 import numpy as np
 import pandas as pd
 from dash.dependencies import Input, Output
+import plotly.graph_objs as go
 
-app = dash.Dash(__name__)
+app = dash.Dash()
 
 df = pd.read_csv('Data/results.csv')
 df['date'] = pd.to_datetime(df['date'])
@@ -15,19 +16,12 @@ df = df[df['date'].dt.year >= 1975]
 available_indicators_home = np.sort(df['home_team'].unique())
 available_indicators_away = np.sort(df['away_team'].unique())
 
-styles = {
-    'pre': {
-        'border': 'thin lightgrey solid',
-        'overflowX': 'scroll'
-    }
-}
-
 app.layout = html.Div([
         html.Div([
 
             html.Div([
                 dcc.Dropdown(
-                    id='crossfilter-xaxis-column',
+                    id='xaxis-column',
                     options=[{'label': i, 'value': i} for i in available_indicators_home],
                     value='England'
                 ),
@@ -36,7 +30,7 @@ app.layout = html.Div([
 
             html.Div([
                 dcc.Dropdown(
-                    id='crossfilter-yaxis-column',
+                    id='yaxis-column',
                     options=[{'label': i, 'value': i} for i in available_indicators_away],
                     value='Italy'
                 ),
@@ -49,7 +43,7 @@ app.layout = html.Div([
     }),
 
         html.Div(dcc.Slider(
-            id='crossfilter-year--slider',
+            id='year-slider',
             min=df['year'].min(),
             max=df['year'].max(),
             value=df['year'].max(),
@@ -59,28 +53,28 @@ app.layout = html.Div([
 
         html.Div([
             dcc.Graph(
-            id='crossfilter-indicator',
-            hoverData={'points': [{'customdata':'date'}]}
+            id='basic-interactions',
+            hoverData={'points': [{'customdata':'England'}]}
             )
         ], style={'width': '98%', 'display': 'inline-block', 'padding': '0 20'})
 ])
 
 @app.callback(
-    dash.dependencies.Output('crossfilter-indicator', 'figure'),
-    [dash.dependencies.Input('crossfilter-xaxis-column', 'value'),
-     dash.dependencies.Input('crossfilter-yaxis-column', 'value'),
-     dash.dependencies.Input('crossfilter-year--slider', 'value')])
+    dash.dependencies.Output('basic-interactions', 'figure'),
+    [dash.dependencies.Input('xaxis-column', 'value'),
+     dash.dependencies.Input('yaxis-column', 'value'),
+     dash.dependencies.Input('year-slider', 'value')])
+
 def update_graph(xaxis_column_name, yaxis_column_name,
-                 xaxis_type, yaxis_type,
                  year_value):
     dff = df[df['year'] == year_value]
 
     return {
-        'data': [go.scatter(
+        'data': [go.Scatter(
             x=dff[dff['home_team'] == xaxis_column_name]['home_score'],
             y=dff[dff['away_team'] == yaxis_column_name]['away_score'],
-            text=dff[dff['home_team'] == yaxis_column_name]['date'],
-            customdata=dff[dff['home_team'] == yaxis_column_name]['date'],
+            text=dff[dff['away_team'] == yaxis_column_name]['date'],
+            customdata=dff[dff['away_team'] == yaxis_column_name]['date'],
             mode='markers',
             marker={
                 'size': 15,
@@ -90,15 +84,16 @@ def update_graph(xaxis_column_name, yaxis_column_name,
         )],
         'layout': go.Layout(
             xaxis={
-                'title': xaxis_column_name
+                'title': xaxis_column_name,
             },
             yaxis={
                 'title': yaxis_column_name
             },
             margin={'l': 40, 'b': 30, 't': 10, 'r': 0},
-            height=450
+            height=450,
+            hovermode='closest'
         )
     }
 
 if __name__ == '__main__':
-    app.run_server(debug=True)
+    app.run_server()
