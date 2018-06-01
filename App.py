@@ -68,20 +68,35 @@ app.layout = html.Div([
 
 def update_graph(xaxis_column_name, yaxis_column_name,
                  year_value):
+
     dff = df[df['year'] == year_value]
 
-    if yaxis_column_name == 'Home':
-        goal1 = dff[dff['home_team'] == xaxis_column_name]['home_score']
-        goal2 = dff.loc[dff['home_team'] == xaxis_column_name, 'away_score']
-        name = dff[dff['home_team'] == xaxis_column_name]['away_team']
-        custom = dff[dff['home_team'] == yaxis_column_name]['home_team']
+    while True:
+        if yaxis_column_name == 'Home':
+            goal1 = dff[dff['home_team'] == xaxis_column_name]['home_score']
+            goal2 = dff.loc[dff['home_team'] == xaxis_column_name, 'away_score']
+            name = dff[dff['home_team'] == xaxis_column_name]['away_team']
+            custom = dff[dff['home_team'] == yaxis_column_name]['home_team']
+            break
 
-    else:
-        goal1 = dff[dff['away_team'] == xaxis_column_name]['away_score']
-        goal2 = dff.loc[dff['away_team'] == xaxis_column_name, 'home_score']
-        name = dff[dff['away_team'] == xaxis_column_name]['home_team']
-        custom = dff[dff['away_team'] == yaxis_column_name]['away_team']
-
+        else:
+            goal1 = dff[dff['away_team'] == xaxis_column_name]['away_score']
+            goal2 = dff.loc[dff['away_team'] == xaxis_column_name, 'home_score']
+            name = dff[dff['away_team'] == xaxis_column_name]['home_team']
+            custom = dff[dff['away_team'] == yaxis_column_name]['away_team']
+            break
+    """
+    while True:
+        if int(goal1) > int(goal2):
+            color_dots = 'green'
+            break
+        elif int(goal1) == int(goal2):
+            color_dots = 'blue'
+            break
+        else:
+            color_dots = 'red'
+            break
+    """
 
     return {
         'data': [go.Scatter(
