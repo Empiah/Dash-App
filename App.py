@@ -13,6 +13,13 @@ df['date'] = pd.to_datetime(df['date'])
 df['year'] = df['date'].dt.year
 df = df[df['date'].dt.year >= 1975]
 
+conditions = [
+    (df['home_score'] == df['away_score']),
+    (df['home_score'] > df['away_score']),
+    (df['home_score'] < df['away_score'])]
+choices = ['D', 'H', 'A']
+df['result'] = np.select(conditions, choices)
+
 available_indicators_home = np.sort(df['home_team'].unique())
 available_indicators_away = ['Home', 'Away']
 #available_indicators_away = np.sort(df['away_team'].unique())
@@ -42,9 +49,8 @@ app.layout = html.Div([
             'backgroundColor': 'rgb(250, 250, 250)',
             'padding': '10px 5px'
     }),
-
         html.Div(dcc.Slider(
-            id='year-slider',
+            id='year',
             min=df['year'].min(),
             max=df['year'].max(),
             value=df['year'].max(),
@@ -54,17 +60,21 @@ app.layout = html.Div([
 
         html.Div([
             dcc.Graph(
-            id='basic-interactions',
+            id='result_scatter',
             hoverData={'points': [{'customdata':'England'}]}
             )
-        ], style={'width': '98%', 'display': 'inline-block', 'padding': '0 20'})
+        ], style={'width': '49%', 'display': 'inline-block', 'padding': '0 20'}),
+        html.Div([
+            dcc.Graph(id='x-time-series'),
+            dcc.Graph(id='y-time-series'),
+        ], style={'display': 'inline-block', 'width': '49%'})
 ])
 
 @app.callback(
-    dash.dependencies.Output('basic-interactions', 'figure'),
+    dash.dependencies.Output('result_scatter', 'figure'),
     [dash.dependencies.Input('xaxis-column', 'value'),
      dash.dependencies.Input('yaxis-column', 'value'),
-     dash.dependencies.Input('year-slider', 'value')])
+     dash.dependencies.Input('year', 'value')])
 
 def update_graph(xaxis_column_name, yaxis_column_name,
                  year_value):
@@ -76,27 +86,25 @@ def update_graph(xaxis_column_name, yaxis_column_name,
             goal1 = dff[dff['home_team'] == xaxis_column_name]['home_score']
             goal2 = dff.loc[dff['home_team'] == xaxis_column_name, 'away_score']
             name = dff[dff['home_team'] == xaxis_column_name]['away_team']
-            custom = dff[dff['home_team'] == yaxis_column_name]['home_team']
+            custom = dff[dff['home_team'] == yaxis_column_name]['away_team']
             break
 
         else:
             goal1 = dff[dff['away_team'] == xaxis_column_name]['away_score']
             goal2 = dff.loc[dff['away_team'] == xaxis_column_name, 'home_score']
             name = dff[dff['away_team'] == xaxis_column_name]['home_team']
-            custom = dff[dff['away_team'] == yaxis_column_name]['away_team']
+            custom = dff[dff['away_team'] == yaxis_column_name]['home_team']
             break
+
     """
-    while True:
-        if int(goal1) > int(goal2):
-            color_dots = 'green'
-            break
-        elif int(goal1) == int(goal2):
-            color_dots = 'blue'
-            break
-        else:
-            color_dots = 'red'
-            break
+    if int(goal1) > int(goal2):
+        color_dots = 'green'
+    elif int(goal1) == int(goal2):
+        color_dots = 'blue'
+    else:
+        color_dots = 'red'
     """
+
 
     return {
         'data': [go.Scatter(
@@ -108,7 +116,7 @@ def update_graph(xaxis_column_name, yaxis_column_name,
             marker=dict(
                 size = 15,
                 opacity = 0.5,
-                color = 'blue',
+                color = goal2 - goal1,
                 line = dict(width = 0.5, color = 'black'
                 )
             )
@@ -125,6 +133,48 @@ def update_graph(xaxis_column_name, yaxis_column_name,
             hovermode='closest'
         )
     }
+
+def create_time_series(dff, title):
+    return {
+        'data': [go.Scatter(
+            x=dff['year'],
+            y=dff['home_score'],
+            mode='lines+markers'
+        )],
+        'layout': {
+            'height': 225,
+            'margin': {'l': 20, 'b': 30, 'r': 10, 't': 10},
+            'annotations': [{
+                'x': 0, 'y': 0.85, 'xanchor': 'left', 'yanchor': 'bottom',
+                'xref': 'paper', 'yref': 'paper', 'showarrow': False,
+                'align': 'left', 'bgcolor': 'rgba(255, 255, 255, 0.5)',
+                'text': title
+            }]
+        }
+    }
+
+
+@app.callback(
+    dash.dependencies.Output('x-time-series', 'figure'),
+    [dash.dependencies.Input('result_scatter', 'hoverData'),
+     dash.dependencies.Input('xaxis-column', 'value')])
+def update_y_timeseries(hoverData, xaxis_column_name):
+    country_name = hoverData['points'][0]['customdata']
+    dff = df[df['home_team'] == country_name]
+    dff = dff[dff['home_team'] == xaxis_column_name]
+    title = '<b>{}</b><br>{}'.format(country_name, xaxis_column_name)
+    return create_time_series(dff, title)
+
+
+@app.callback(
+    dash.dependencies.Output('y-time-series', 'figure'),
+    [dash.dependencies.Input('result_scatter', 'hoverData'),
+     dash.dependencies.Input('yaxis-column', 'value')])
+def update_x_timeseries(hoverData, yaxis_column_name):
+    dff = df[df['away_team'] == hoverData['points'][0]['customdata']]
+    dff = dff[dff['away_team'] == yaxis_column_name]
+    return create_time_series(dff, yaxis_column_name)
+
 
 if __name__ == '__main__':
     app.run_server()
