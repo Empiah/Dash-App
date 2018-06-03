@@ -169,11 +169,13 @@ def update_y_timeseries(hoverData, xaxis_column_name):
 @app.callback(
     dash.dependencies.Output('y-time-series', 'figure'),
     [dash.dependencies.Input('result_scatter', 'hoverData'),
-     dash.dependencies.Input('yaxis-column', 'value')])
-def update_x_timeseries(hoverData, yaxis_column_name):
-    dff = df[df['away_team'] == hoverData['points'][0]['customdata']]
-    dff = dff[dff['away_team'] == yaxis_column_name]
-    return create_time_series(dff, yaxis_column_name)
+     dash.dependencies.Input('xaxis-column', 'value')])
+def update_x_timeseries(hoverData, xaxis_column_name):
+    country_name = hoverData['points'][0]['customdata']
+    dff = df[df['home_team'] == country_name]
+    dff = dff[dff['home_team'] == xaxis_column_name]
+    title = '<b>{}</b><br>{}'.format(country_name, xaxis_column_name)
+    return create_time_series(dff, title)
 
 
 if __name__ == '__main__':
