@@ -135,10 +135,25 @@ def update_graph(xaxis_column_name, yaxis_column_name,
     }
 
 def create_time_series(dff, title):
+    """
+    while True:
+        if yaxis_column_name == 'Home':
+            goal3 = dff['home_score'] - dff['away_score']
+            name = dff[dff['home_team'] == xaxis_column_name]['away_team']
+            custom = dff[dff['home_team'] == yaxis_column_name]['away_team']
+            break
+
+        else:
+            goal3 = dff['away_score'] - dff['home_score']
+            name = dff[dff['away_team'] == xaxis_column_name]['home_team']
+            custom = dff[dff['away_team'] == yaxis_column_name]['home_team']
+            break
+    """
     return {
         'data': [go.Scatter(
-            x=dff['year'],
+            x=dff['date'],
             y=dff['home_score'],
+            text= dff['away_team'],
             mode='lines+markers'
         )],
         'layout': {
@@ -162,6 +177,7 @@ def update_y_timeseries(hoverData, xaxis_column_name):
     country_name = hoverData['points'][0]['customdata']
     dff = df[df['home_team'] == country_name]
     dff = dff[dff['home_team'] == xaxis_column_name]
+    dff = dff[dff['year'] == 2016] #change this
     title = '<b>{}</b><br>{}'.format(country_name, xaxis_column_name)
     return create_time_series(dff, title)
 
