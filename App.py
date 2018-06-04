@@ -13,13 +13,6 @@ df['date'] = pd.to_datetime(df['date'])
 df['year'] = df['date'].dt.year
 df = df[df['date'].dt.year >= 1975]
 
-conditions = [
-    (df['home_score'] == df['away_score']),
-    (df['home_score'] > df['away_score']),
-    (df['home_score'] < df['away_score'])]
-choices = ['D', 'H', 'A']
-df['result'] = np.select(conditions, choices)
-
 available_indicators_home = np.sort(df['home_team'].unique())
 available_indicators_away = ['Home', 'Away']
 #available_indicators_away = np.sort(df['away_team'].unique())
@@ -87,6 +80,7 @@ def update_graph(xaxis_column_name, yaxis_column_name,
             goal2 = dff.loc[dff['home_team'] == xaxis_column_name, 'away_score']
             name = dff[dff['home_team'] == xaxis_column_name]['away_team']
             custom = dff[dff['home_team'] == yaxis_column_name]['away_team']
+            goal3 = dff['home_score'] - dff['away_score']
             break
 
         else:
@@ -94,6 +88,7 @@ def update_graph(xaxis_column_name, yaxis_column_name,
             goal2 = dff.loc[dff['away_team'] == xaxis_column_name, 'home_score']
             name = dff[dff['away_team'] == xaxis_column_name]['home_team']
             custom = dff[dff['away_team'] == yaxis_column_name]['home_team']
+            goal3 = dff['away_score'] - dff['home_score']
             break
 
     """
@@ -134,7 +129,7 @@ def update_graph(xaxis_column_name, yaxis_column_name,
         )
     }
 
-def create_time_series(dff, title):
+def create_time_series_x(dff, title):
     """
     while True:
         if yaxis_column_name == 'Home':
@@ -168,30 +163,67 @@ def create_time_series(dff, title):
         }
     }
 
+def create_time_series_y(dff, title, yaxis_column_name, xaxis_column_name):
+    while True:
+        if yaxis_column_name == 'Home':
+            goal1 = dff[dff['home_team'] == xaxis_column_name]['home_score']
+            goal2 = dff.loc[dff['home_team'] == xaxis_column_name, 'away_score']
+            goal_net = goal1-goal2
+            break
+
+        else:
+            goal1 = dff[dff['away_team'] == xaxis_column_name]['away_score']
+            goal2 = dff.loc[dff['away_team'] == xaxis_column_name, 'home_score']
+            goal_net = goal2-goal1
+            break
+
+    return {
+        'data': [go.Scatter(
+            x=dff['date'],
+            y=goal_net,
+            text= dff['away_team'],
+            mode='lines+markers'
+        )],
+        'layout': {
+            'height': 225,
+            'margin': {'l': 20, 'b': 30, 'r': 10, 't': 10},
+            'annotations': [{
+                'x': 0, 'y': 0.85, 'xanchor': 'left', 'yanchor': 'bottom',
+                'xref': 'paper', 'yref': 'paper', 'showarrow': False,
+                'align': 'left', 'bgcolor': 'rgba(255, 255, 255, 0.5)',
+                'text': title
+            }]
+        }
+    }
+
 
 @app.callback(
     dash.dependencies.Output('x-time-series', 'figure'),
     [dash.dependencies.Input('result_scatter', 'hoverData'),
+     dash.dependencies.Input('year', 'value'),
+     dash.dependencies.Input('yaxis-column', 'value'),
      dash.dependencies.Input('xaxis-column', 'value')])
-def update_y_timeseries(hoverData, xaxis_column_name):
+def update_y_timeseries(hoverData, year_value, yaxis_column_name, xaxis_column_name):
+    dff = df[df['year'] == year_value]
     country_name = hoverData['points'][0]['customdata']
-    dff = df[df['home_team'] == country_name]
+    dff = dff[dff['home_team'] == country_name]
     dff = dff[dff['home_team'] == xaxis_column_name]
-    dff = dff[dff['year'] == 2016] #change this
     title = '<b>{}</b><br>{}'.format(country_name, xaxis_column_name)
-    return create_time_series(dff, title)
+    return create_time_series_y(dff, title, yaxis_column_name, xaxis_column_name)
 
 
 @app.callback(
     dash.dependencies.Output('y-time-series', 'figure'),
     [dash.dependencies.Input('result_scatter', 'hoverData'),
+     dash.dependencies.Input('year', 'value'),
      dash.dependencies.Input('xaxis-column', 'value')])
-def update_x_timeseries(hoverData, xaxis_column_name):
+def update_x_timeseries(hoverData, year_value, xaxis_column_name):
+    dff = df[df['year'] == year_value]
     country_name = hoverData['points'][0]['customdata']
-    dff = df[df['home_team'] == country_name]
+    dff = dff[dff['home_team'] == country_name]
     dff = dff[dff['home_team'] == xaxis_column_name]
     title = '<b>{}</b><br>{}'.format(country_name, xaxis_column_name)
-    return create_time_series(dff, title)
+    return create_time_series_x(dff, title)
 
 
 if __name__ == '__main__':
