@@ -218,8 +218,16 @@ def update_y_timeseries(hoverData, year_value, yaxis_column_name, xaxis_column_n
     dff = df[df['year'] == year_value]
     dff_two = df[df['year'] == year_value]
     country_name = xaxis_column_name
-    dff = dff[dff['home_team'] == country_name]
-    dff = dff[dff['home_team'] == xaxis_column_name]
+
+    while True:
+        if yaxis_column_name == 'Home':
+            dff = dff[dff['home_team'] == country_name]
+            break
+
+        else:
+            dff = dff[dff['away_team'] == country_name]
+            break
+
     title = '<b>{}</b><br>Net Goals - Above Zero Equals a Win, Below Equals a Loss'.format(country_name)
     return create_time_series_y(dff, dff_two, title, yaxis_column_name, xaxis_column_name)
 
