@@ -79,7 +79,7 @@ def update_graph(xaxis_column_name, yaxis_column_name,
             goal1 = dff[dff['home_team'] == xaxis_column_name]['home_score']
             goal2 = dff.loc[dff['home_team'] == xaxis_column_name, 'away_score']
             name = dff[dff['home_team'] == xaxis_column_name]['away_team']
-            custom = dff[dff['home_team'] == yaxis_column_name]['away_team']
+            custom = dff[dff['home_team'] == xaxis_column_name]['away_team']
             goal3 = dff['home_score'] - dff['away_score']
             break
 
@@ -87,7 +87,7 @@ def update_graph(xaxis_column_name, yaxis_column_name,
             goal1 = dff[dff['away_team'] == xaxis_column_name]['away_score']
             goal2 = dff.loc[dff['away_team'] == xaxis_column_name, 'home_score']
             name = dff[dff['away_team'] == xaxis_column_name]['home_team']
-            custom = dff[dff['away_team'] == yaxis_column_name]['home_team']
+            custom = dff[dff['away_team'] == xaxis_column_name]['home_team']
             goal3 = dff['away_score'] - dff['home_score']
             break
 
@@ -217,7 +217,7 @@ def create_time_series_y(dff, dff_two, title, yaxis_column_name, xaxis_column_na
 def update_y_timeseries(hoverData, year_value, yaxis_column_name, xaxis_column_name):
     dff = df[df['year'] == year_value]
     dff_two = df[df['year'] == year_value]
-    country_name = hoverData['points'][0]['customdata']
+    country_name = xaxis_column_name
     dff = dff[dff['home_team'] == country_name]
     dff = dff[dff['home_team'] == xaxis_column_name]
     title = '<b>{}</b><br>Net Goals - Above Zero Equals a Win, Below Equals a Loss'.format(country_name)
@@ -234,11 +234,17 @@ def update_x_timeseries(hoverData, year_value, yaxis_column_name, xaxis_column_n
     dff = df[df['year'] == year_value]
     dff_two = df[df['year'] == year_value]
     country_name = hoverData['points'][0]['customdata']
-    dff = dff[dff['home_team'] == country_name]
-    dff = dff[dff['home_team'] == xaxis_column_name]
+    dff = dff[dff['away_team'] == country_name]
     title = '<b>{}</b><br>Net Goals - Above Zero Equals a Win, Below Equals a Loss'.format(country_name)
     return create_time_series_x(dff, dff_two, title, yaxis_column_name, xaxis_column_name)
 
 
 if __name__ == '__main__':
     app.run_server()
+
+
+
+#TO DO
+#Fix the away graphs to show right names and check the values
+#adapt it so we can use it for away teams too (use yaxis name?)
+#test
