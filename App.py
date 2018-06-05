@@ -122,18 +122,34 @@ def update_graph(xaxis_column_name, yaxis_column_name,
 def create_time_series_x(dff, dff_two, title, yaxis_column_name, xaxis_column_name):
     while True:
         if yaxis_column_name == 'Home':
-            goal_score = dff_two[dff_two['home_team'] == xaxis_column_name]['home_score']
+            goal1 = dff_two[dff_two['home_team'] == xaxis_column_name]['home_score']
+            goal2 = dff_two.loc[dff_two['home_team'] == xaxis_column_name, 'away_score']
+            name = dff_two[dff_two['home_team'] == xaxis_column_name]['away_team']
+            goal_net = goal1-goal2
+            goal_colour = goal2-goal1
             break
 
         else:
-            goal_score = dff_two[dff_two['away_team'] == xaxis_column_name]['away_score']
+            goal1 = dff_two[dff_two['away_team'] == xaxis_column_name]['away_score']
+            goal2 = dff_two.loc[dff_two['away_team'] == xaxis_column_name, 'home_score']
+            name = dff_two[dff_two['away_team'] == xaxis_column_name]['home_team']
+            goal_net = goal1-goal2
+            goal_colour = goal2-goal1
             break
+
     return {
         'data': [go.Scatter(
             x=dff['date'],
-            y=goal_score,
-            text= dff['away_team'],
-            mode='lines+markers'
+            y=goal_net,
+            text=name,
+            mode='lines+markers',
+            marker=dict(
+                size = 8,
+                opacity = 0.9,
+                color = goal_colour,
+                line = dict(width = 0.5, color = 'black'
+                )
+            )
         )],
         'layout': {
             'height': 225,
@@ -152,21 +168,32 @@ def create_time_series_y(dff, dff_two, title, yaxis_column_name, xaxis_column_na
         if yaxis_column_name == 'Home':
             goal1 = dff_two[dff_two['home_team'] == xaxis_column_name]['home_score']
             goal2 = dff_two.loc[dff_two['home_team'] == xaxis_column_name, 'away_score']
+            name = dff_two[dff_two['home_team'] == xaxis_column_name]['away_team']
             goal_net = goal1-goal2
+            goal_colour = goal2-goal1
             break
 
         else:
             goal1 = dff_two[dff_two['away_team'] == xaxis_column_name]['away_score']
             goal2 = dff_two.loc[dff_two['away_team'] == xaxis_column_name, 'home_score']
-            goal_net = goal2-goal1
+            name = dff_two[dff_two['away_team'] == xaxis_column_name]['home_team']
+            goal_net = goal1-goal2
+            goal_colour = goal2-goal1
             break
 
     return {
         'data': [go.Scatter(
             x=dff['date'],
             y=goal_net,
-            text= dff['away_team'],
-            mode='lines+markers'
+            text=name,
+            mode='lines+markers',
+            marker=dict(
+                size = 8,
+                opacity = 0.9,
+                color = goal_colour,
+                line = dict(width = 0.5, color = 'black'
+                )
+            )
         )],
         'layout': {
             'height': 225,
@@ -209,7 +236,7 @@ def update_x_timeseries(hoverData, year_value, yaxis_column_name, xaxis_column_n
     country_name = hoverData['points'][0]['customdata']
     dff = dff[dff['home_team'] == country_name]
     dff = dff[dff['home_team'] == xaxis_column_name]
-    title = '<b>{}</b><br>Total Goals'.format(country_name)
+    title = '<b>{}</b><br>Net Goals - Above Zero Equals a Win, Below Equals a Loss'.format(country_name)
     return create_time_series_x(dff, dff_two, title, yaxis_column_name, xaxis_column_name)
 
 
