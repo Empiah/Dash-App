@@ -5,6 +5,7 @@ import numpy as np
 import pandas as pd
 from dash.dependencies import Input, Output
 import plotly.graph_objs as go
+import plotly.figure_factory as ff
 
 app = dash.Dash()
 
@@ -60,7 +61,12 @@ app.layout = html.Div([
         html.Div([
             dcc.Graph(id='x-time-series'),
             dcc.Graph(id='y-time-series'),
-        ], style={'display': 'inline-block', 'width': '49%'})
+        ], style={'display': 'inline-block', 'width': '49%'}),
+
+        html.Div([
+            dcc.Graph(id='table-data')
+        ], style={'display': 'inline-block', 'width': '98%'})
+
 ])
 
 @app.callback(
@@ -228,7 +234,7 @@ def update_y_timeseries(hoverData, year_value, yaxis_column_name, xaxis_column_n
             dff = dff[dff['away_team'] == country_name]
             break
 
-    title = '<b>{}</b><br>Net Goals - Above Zero Equals a Win, Below Equals a Loss'.format(country_name)
+    title = '<b>{} {} Results</b><br>Net Goals - Above Zero Equals a Win, Below Equals a Loss'.format(country_name, yaxis_column_name)
     return create_time_series_y(dff, dff_two, title, yaxis_column_name, xaxis_column_name)
 
 
@@ -252,8 +258,37 @@ def update_x_timeseries(hoverData, year_value, yaxis_column_name, xaxis_column_n
             dff = dff[dff['away_team'] == country_name]
             break
 
-    title = '<b>{}</b><br>Net Goals - Above Zero Equals a Win, Below Equals a Loss'.format(country_name)
+    title = '<b>{} {} Results</b><br>Net Goals - Above Zero Equals a Win, Below Equals a Loss'.format(country_name,yaxis_column_name)
     return create_time_series_x(dff, dff_two, title, yaxis_column_name, xaxis_column_name, country_name)
+
+@app.callback(
+    dash.dependencies.Output('table-data', 'figure'),
+    [dash.dependencies.Input('result_scatter', 'hoverData'),
+     dash.dependencies.Input('year', 'value'),
+     dash.dependencies.Input('yaxis-column', 'value'),
+     dash.dependencies.Input('xaxis-column', 'value')])
+def update_table_data(hoverData, year_value, yaxis_column_name, xaxis_column_name):
+    dff = df[df['year'] == year_value]
+    dff_two = df[df['year'] == year_value]
+    country_name = hoverData['points'][0]['customdata']
+    dff.drop(['neutral', 'year'], axis=1, inplace=True)
+    while True:
+        if yaxis_column_name == 'Home':
+            dff = dff[dff['home_team'].isin([xaxis_column_name, country_name])]
+            break
+
+        else:
+            dff = dff[dff['away_team'].isin([xaxis_column_name, country_name])]
+            break
+
+    title = '<b>Table shows all {} games for {} and {}</b><br>'.format(yaxis_column_name, xaxis_column_name, country_name)
+    new_table_figure = ff.create_table(dff)
+    new_table_figure.layout.margin.update({'t':75, 'l':5})
+    new_table_figure.layout.update({'title': title})
+    for i in range(len(new_table_figure.layout.annotations)):
+        new_table_figure.layout.annotations[i].font.size = 11
+
+    return new_table_figure
 
 
 if __name__ == '__main__':
@@ -263,3 +298,4 @@ if __name__ == '__main__':
 
 #TO DO
 #add a filter so that we can choose 'All'
+#add table underneath giving data about competition, location played etc.
