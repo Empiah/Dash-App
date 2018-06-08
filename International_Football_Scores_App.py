@@ -26,7 +26,7 @@ available_indicators_homeaway = ['Home', 'Away']
 #for example if the slider is above the dropdown it will appear above
 app.layout = html.Div([
         html.Div([
-            #adding a dropdown which we give an id and ask it to use the options we defined above. The value is simply its starting value when you open the app.
+            #adding a dropdown which we give an id and ask it to use the options we defined above. The 'value' is simply its starting value when you open the app.
             html.Div([
                 dcc.Dropdown(
                     id='xaxis-column',
@@ -46,7 +46,7 @@ app.layout = html.Div([
                 ),
             ],
             style={'width': '23%', 'float': 'right', 'display': 'inline-block'})
-           #this style piece is assigning values for both dropdown lists, chaning the colour to make it stand out,
+           #this style piece is assigning values for both dropdown lists, changing the colour to make it stand out,
         ], style={
             'borderBottom': 'thin lightgrey solid',
             'backgroundColor': 'rgb(250, 250, 250)',
@@ -107,7 +107,7 @@ def update_graph(xaxis_column_name, yaxis_column_name,
             custom = dff[dff['away_team'] == xaxis_column_name]['home_team']
             goal3 = dff['away_score'] - dff['home_score']
             break
-    #it will return the plot we are looking for
+    #here, the return will return the plot we are looking for
     return {
         'data': [go.Scatter(
             x=goal1,
@@ -124,6 +124,7 @@ def update_graph(xaxis_column_name, yaxis_column_name,
             )
         )],
         #this gives information about more visual layouts like the hovermode and the title
+        #the hovermode is basically the datapoint for what we are hovering over
         'layout': go.Layout(
             xaxis={
                 'title': xaxis_column_name,
@@ -155,7 +156,7 @@ def create_time_series_x(dff, dff_two, title, yaxis_column_name, xaxis_column_na
             goal_net = goal1-goal2
             goal_colour = goal2-goal1
             break
-    #this returns the grah we are looking for
+    #this returns the graph we are looking for
     return {
         'data': [go.Scatter(
             x=dff['date'],
