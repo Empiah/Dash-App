@@ -77,6 +77,9 @@ app.layout = html.Div([
         #this is for a table below the data that will additional information
         html.Div([
             dcc.Graph(id='table-data')
+        ], style={'display': 'inline-block', 'width': '98%'}),
+        html.Div([
+            dcc.Graph(id='head-to-head')
         ], style={'display': 'inline-block', 'width': '98%'})
 ])
 #this defines what we want to update (main chart) and what data will update it
@@ -323,6 +326,60 @@ def update_table_data(hoverData, year_value, yaxis_column_name, xaxis_column_nam
     return new_table_figure
 
 
+@app.callback(
+    dash.dependencies.Output('head-to-head', 'figure'),
+    [dash.dependencies.Input('xaxis-column', 'value'),
+     dash.dependencies.Input('result_scatter', 'hoverData')])
+#this function will provide the informat to update the graph
+def update_hth_graph(xaxis_column_name, hoverData):
+    #ensures that the year we are showing matches the year we select
+    #loop to ascertain whether we are looking at Home or Away data. it assigns values accordingly
+    country_name = hoverData['points'][0]['customdata']
+    dff = df[df['home_team'].isin([xaxis_column_name, country_name])]
+    dff = dff[dff['away_team'].isin([xaxis_column_name, country_name])]
+
+    if xaxis_column_name == dff['home_team']:
+        goal1 = dff[dff['home_team'] == xaxis_column_name]['home_score']
+        goal2 = dff.loc[dff['home_team'] == xaxis_column_name, 'away_score']
+        name = dff[dff['home_team'] == xaxis_column_name]['away_team']
+        goal_net = goal1-goal2
+        goal_colour = goal2-goal1
+    else:
+        goal1 = dff[dff['home_team'] == xaxis_column_name]['home_score']
+        goal2 = dff.loc[dff['home_team'] == xaxis_column_name, 'away_score']
+        name = dff[dff['away_team'] == xaxis_column_name]['home_team']
+        goal_net = goal1-goal2
+        goal_colour = goal2-goal1
+
+
+    #this returns the grah we are looking for
+    return {
+        'data': [go.Scatter(
+            x=dff['date'],
+            y=goal_net,
+            text=name,
+            mode='lines+markers',
+            marker=dict(
+                size = 8,
+                opacity = 0.9,
+                color = goal_colour,
+                line = dict(width = 0.5, color = 'black'
+                )
+            )
+        )],
+        'layout': {
+            'height': 225,
+            'margin': {'l': 20, 'b': 30, 'r': 10, 't': 10},
+            'annotations': [{
+                'x': 0, 'y': 0.85, 'xanchor': 'left', 'yanchor': 'bottom',
+                'xref': 'paper', 'yref': 'paper', 'showarrow': False,
+                'align': 'left', 'bgcolor': 'rgba(255, 255, 255, 0.5)',
+                'text': title
+            }]
+        }
+    }
+
+
 if __name__ == '__main__':
     app.run_server()
 
@@ -330,4 +387,4 @@ if __name__ == '__main__':
 
 #TO DO
 #add a filter so that we can choose 'All'
-#head to head of teams
+# fix head to head of teams
