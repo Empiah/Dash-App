@@ -245,12 +245,13 @@ def create_hth(dff, xaxis_column_name, yaxis_column_name, title):
             goal_colour = goal2-goal1
             break
         else:
-            goal1 = dff[dff['home_team'] == xaxis_column_name]['home_score']
-            goal2 = dff.loc[dff['home_team'] == xaxis_column_name, 'away_score']
+            goal1 = dff[dff['away_team'] == xaxis_column_name]['away_score']
+            goal2 = dff.loc[dff['away_team'] == xaxis_column_name, 'home_score']
             name = dff[dff['away_team'] == xaxis_column_name]['date']
             goal_net = goal1-goal2
             goal_colour = goal2-goal1
             break
+
 
     #this returns the grah we are looking for
     return {
