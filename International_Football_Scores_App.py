@@ -76,10 +76,11 @@ app.layout = html.Div([
         ], style={'display': 'inline-block', 'width': '49%'}),
         #this is for a table below the data that will additional information
         html.Div([
-            dcc.Graph(id='table-data')
+            dcc.Graph(id='table-data'),
         ], style={'display': 'inline-block', 'width': '98%'}),
+        #this will show head to head information
         html.Div([
-            dcc.Graph(id='head-to-head')
+            dcc.Graph(id='head-to-head'),
         ], style={'display': 'inline-block', 'width': '98%'})
 ])
 #this defines what we want to update (main chart) and what data will update it
@@ -232,6 +233,53 @@ def create_time_series_y(dff, dff_two, title, yaxis_column_name, xaxis_column_na
         }
     }
 
+def create_hth(dff, xaxis_column_name, yaxis_column_name, title):
+    #loop to ascertain whether we are looking at Home or Away data. it assigns values accordingly
+
+    while True:
+        if yaxis_column_name == 'Home':
+            goal1 = dff[dff['home_team'] == xaxis_column_name]['home_score']
+            goal2 = dff.loc[dff['home_team'] == xaxis_column_name, 'away_score']
+            name = dff[dff['home_team'] == xaxis_column_name]['date']
+            goal_net = goal1-goal2
+            goal_colour = goal2-goal1
+            break
+        else:
+            goal1 = dff[dff['home_team'] == xaxis_column_name]['home_score']
+            goal2 = dff.loc[dff['home_team'] == xaxis_column_name, 'away_score']
+            name = dff[dff['away_team'] == xaxis_column_name]['date']
+            goal_net = goal1-goal2
+            goal_colour = goal2-goal1
+            break
+
+    #this returns the grah we are looking for
+    return {
+        'data': [go.Scatter(
+            x=dff['date'],
+            y=goal_net,
+            text=name,
+            mode='lines+markers',
+            marker=dict(
+                size = 8,
+                opacity = 0.9,
+                color = goal_colour,
+                line = dict(width = 0.5, color = 'black'
+                )
+            )
+        )],
+        'layout': {
+            'height': 225,
+            'margin': {'l': 20, 'b': 30, 'r': 10, 't': 10},
+            'annotations': [{
+                'x': 0, 'y': 0.85, 'xanchor': 'left', 'yanchor': 'bottom',
+                'xref': 'paper', 'yref': 'paper', 'showarrow': False,
+                'align': 'left', 'bgcolor': 'rgba(255, 255, 255, 0.5)',
+                'text': title
+            }]
+        }
+    }
+
+
 #callback shows what we want to update and the data that will update it
 @app.callback(
     dash.dependencies.Output('x-time-series', 'figure'),
@@ -289,6 +337,22 @@ def update_x_timeseries(hoverData, year_value, yaxis_column_name, xaxis_column_n
     title = '<b>{} {} Results</b><br>Net Goals - Above Zero Equals a Win, Below Equals a Loss'.format(country_name,yaxis_column_name)
     return create_time_series_x(dff, dff_two, title, yaxis_column_name, xaxis_column_name, country_name)
 
+
+@app.callback(
+    dash.dependencies.Output('head-to-head', 'figure'),
+    [dash.dependencies.Input('result_scatter', 'hoverData'),
+     dash.dependencies.Input('xaxis-column', 'value'),
+     dash.dependencies.Input('yaxis-column', 'value')])
+def update_hth_graph(hoverData, xaxis_column_name, yaxis_column_name):
+
+    country_name = hoverData['points'][0]['customdata']
+    dff = df[df['home_team'].isin([xaxis_column_name, country_name])]
+    dff = dff[dff['away_team'].isin([xaxis_column_name, country_name])]
+    title = '<b>Graph shows head to head games between {} and {}</b><br> A result above 0 shows a win for the user selected team'.format(xaxis_column_name, country_name)
+
+    return create_hth(dff, xaxis_column_name, yaxis_column_name, title)
+
+
 #finally a table to update that gives more information
 @app.callback(
     dash.dependencies.Output('table-data', 'figure'),
@@ -324,60 +388,6 @@ def update_table_data(hoverData, year_value, yaxis_column_name, xaxis_column_nam
         new_table_figure.layout.annotations[i].font.size = 11
 
     return new_table_figure
-
-
-@app.callback(
-    dash.dependencies.Output('head-to-head', 'figure'),
-    [dash.dependencies.Input('xaxis-column', 'value'),
-     dash.dependencies.Input('result_scatter', 'hoverData')])
-#this function will provide the informat to update the graph
-def update_hth_graph(xaxis_column_name, hoverData):
-    #ensures that the year we are showing matches the year we select
-    #loop to ascertain whether we are looking at Home or Away data. it assigns values accordingly
-    country_name = hoverData['points'][0]['customdata']
-    dff = df[df['home_team'].isin([xaxis_column_name, country_name])]
-    dff = dff[dff['away_team'].isin([xaxis_column_name, country_name])]
-
-    if xaxis_column_name == dff['home_team']:
-        goal1 = dff[dff['home_team'] == xaxis_column_name]['home_score']
-        goal2 = dff.loc[dff['home_team'] == xaxis_column_name, 'away_score']
-        name = dff[dff['home_team'] == xaxis_column_name]['away_team']
-        goal_net = goal1-goal2
-        goal_colour = goal2-goal1
-    else:
-        goal1 = dff[dff['home_team'] == xaxis_column_name]['home_score']
-        goal2 = dff.loc[dff['home_team'] == xaxis_column_name, 'away_score']
-        name = dff[dff['away_team'] == xaxis_column_name]['home_team']
-        goal_net = goal1-goal2
-        goal_colour = goal2-goal1
-
-
-    #this returns the grah we are looking for
-    return {
-        'data': [go.Scatter(
-            x=dff['date'],
-            y=goal_net,
-            text=name,
-            mode='lines+markers',
-            marker=dict(
-                size = 8,
-                opacity = 0.9,
-                color = goal_colour,
-                line = dict(width = 0.5, color = 'black'
-                )
-            )
-        )],
-        'layout': {
-            'height': 225,
-            'margin': {'l': 20, 'b': 30, 'r': 10, 't': 10},
-            'annotations': [{
-                'x': 0, 'y': 0.85, 'xanchor': 'left', 'yanchor': 'bottom',
-                'xref': 'paper', 'yref': 'paper', 'showarrow': False,
-                'align': 'left', 'bgcolor': 'rgba(255, 255, 255, 0.5)',
-                'text': title
-            }]
-        }
-    }
 
 
 if __name__ == '__main__':
