@@ -103,7 +103,6 @@ def update_graph(xaxis_column_name, yaxis_column_name,
             custom = dff[dff['home_team'] == xaxis_column_name]['away_team']
             goal3 = dff['home_score'] - dff['away_score']
             break
-
         else:
             goal1 = dff[dff['away_team'] == xaxis_column_name]['away_score']
             goal2 = dff.loc[dff['away_team'] == xaxis_column_name, 'home_score']
@@ -111,6 +110,8 @@ def update_graph(xaxis_column_name, yaxis_column_name,
             custom = dff[dff['away_team'] == xaxis_column_name]['home_team']
             goal3 = dff['away_score'] - dff['home_score']
             break
+
+    title_1 = '<b>Score Matrix showing {} games for {}</b><br> Change the dropdown\'s above to modify the data shown'.format(yaxis_column_name, xaxis_column_name)
     #here, the return will return the plot we are looking for
     return {
         'data': [go.Scatter(
@@ -138,7 +139,11 @@ def update_graph(xaxis_column_name, yaxis_column_name,
             },
             margin={'l': 40, 'b': 30, 't': 10, 'r': 0},
             height=450,
-            hovermode='closest'
+            hovermode='closest',
+            annotations =    [{ 'x': 0, 'y': 0.95, 'xanchor': 'left', 'yanchor': 'bottom',
+                            'xref': 'paper', 'yref': 'paper', 'showarrow': False,
+                            'align': 'left', 'bgcolor': 'rgba(255, 255, 255, 0.5)',
+                            'text': title_1 }]
         )
     }
 #this function creates one of the timeseries graphs
@@ -349,7 +354,7 @@ def update_hth_graph(hoverData, xaxis_column_name, yaxis_column_name):
     country_name = hoverData['points'][0]['customdata']
     dff = df[df['home_team'].isin([xaxis_column_name, country_name])]
     dff = dff[dff['away_team'].isin([xaxis_column_name, country_name])]
-    title = '<b>Graph shows head to head games between {} and {}</b><br> A result above 0 shows a win for the user selected team'.format(xaxis_column_name, country_name)
+    title = '<b>Graph shows head to head {} games for {} versus {}</b><br> A result above 0 shows a win for the user selected team'.format(yaxis_column_name, xaxis_column_name, country_name)
 
     return create_hth(dff, xaxis_column_name, yaxis_column_name, title)
 
@@ -398,4 +403,4 @@ if __name__ == '__main__':
 
 #TO DO
 #add a filter so that we can choose 'All'
-# fix head to head of teams
+# add regression information?
