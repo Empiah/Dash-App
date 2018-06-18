@@ -19,7 +19,7 @@ df = df[df['date'].dt.year >= 1975]
 
 #this will be the list of indicators that are available to select in drop downs
 available_indicators_teams = np.sort(df['home_team'].unique())
-available_indicators_homeaway = ['Home', 'Away']
+available_indicators_homeaway = ['Home', 'Away', 'All']
 
 #in here we start to define the outline of our app and get it define how it looks
 #the order that it is in is how it will appear
@@ -103,6 +103,27 @@ def update_graph(xaxis_column_name, yaxis_column_name,
             custom = dff[dff['home_team'] == xaxis_column_name]['away_team']
             goal3 = dff['home_score'] - dff['away_score']
             break
+
+        elif yaxis_column_name == 'All':
+            dff_1 = dff[dff['home_team'].isin([xaxis_column_name])]
+            dff_2 = dff[dff['away_team'].isin([xaxis_column_name])]
+            dff = dff_1.append(dff_2, ignore_index=True)
+
+            if dff['home_team'].isin([xaxis_column_name]):
+                goal1 = dff[dff['home_team'] == xaxis_column_name]['home_score']
+                goal2 = dff.loc[dff['home_team'] == xaxis_column_name, 'away_score']
+                name = dff[dff['home_team'] == xaxis_column_name]['away_team']
+                custom = dff[dff['home_team'] == xaxis_column_name]['away_team']
+                goal3 = dff['home_score'] - dff['away_score']
+
+            else:
+                goal1 = dff[dff['away_team'] == xaxis_column_name]['away_score']
+                goal2 = dff.loc[dff['away_team'] == xaxis_column_name, 'home_score']
+                name = dff[dff['away_team'] == xaxis_column_name]['home_team']
+                custom = dff[dff['away_team'] == xaxis_column_name]['home_team']
+                goal3 = dff['away_score'] - dff['home_score']
+            break
+
         else:
             goal1 = dff[dff['away_team'] == xaxis_column_name]['away_score']
             goal2 = dff.loc[dff['away_team'] == xaxis_column_name, 'home_score']
@@ -352,8 +373,17 @@ def update_x_timeseries(hoverData, year_value, yaxis_column_name, xaxis_column_n
 def update_hth_graph(hoverData, xaxis_column_name, yaxis_column_name):
 
     country_name = hoverData['points'][0]['customdata']
-    dff = df[df['home_team'].isin([xaxis_column_name, country_name])]
-    dff = dff[dff['away_team'].isin([xaxis_column_name, country_name])]
+    while True:
+        if yaxis_column_name == 'All':
+            dff_1 = df[df['home_team'].isin([xaxis_column_name, country_name])]
+            dff_2 = df[df['away_team'].isin([xaxis_column_name, country_name])]
+            dff = dff_1.append(dff_2, ignore_index=True)
+            break
+        else:
+            dff = df[df['home_team'].isin([xaxis_column_name, country_name])]
+            dff = dff[dff['away_team'].isin([xaxis_column_name, country_name])]
+            break
+
     title = '<b>Graph shows head to head {} games for {} versus {}</b><br> A result above 0 shows a win for the user selected team'.format(yaxis_column_name, xaxis_column_name, country_name)
 
     return create_hth(dff, xaxis_column_name, yaxis_column_name, title)
@@ -377,7 +407,11 @@ def update_table_data(hoverData, year_value, yaxis_column_name, xaxis_column_nam
         if yaxis_column_name == 'Home':
             dff = dff[dff['home_team'].isin([xaxis_column_name, country_name])]
             break
-
+        elif yaxis_column_name == 'All':
+            dff_1 = dff[dff['home_team'].isin([xaxis_column_name,country_name])]
+            dff_2 = dff[dff['away_team'].isin([xaxis_column_name,country_name])]
+            dff = dff_1.append(dff_2, ignore_index=True)
+            break
         else:
             dff = dff[dff['away_team'].isin([xaxis_column_name, country_name])]
             break
@@ -402,3 +436,6 @@ if __name__ == '__main__':
 
 
 #TO DO
+#remove duplicate games in the table when you select All
+#get the All filter working on graphs, on the table it should be fine apart from bug above
+#ability to select opponent team
