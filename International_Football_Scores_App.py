@@ -402,5 +402,3 @@ if __name__ == '__main__':
 
 
 #TO DO
-#add a filter so that we can choose 'All'
-# add regression information?
