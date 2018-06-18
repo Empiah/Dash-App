@@ -105,25 +105,30 @@ def update_graph(xaxis_column_name, yaxis_column_name,
             break
 
         elif yaxis_column_name == 'All':
+            #making two lists of where the selected team is in away or home, and then appending
             dff_1 = dff[dff['home_team'].isin([xaxis_column_name])]
             dff_2 = dff[dff['away_team'].isin([xaxis_column_name])]
             dff = dff_1.append(dff_2, ignore_index=True)
 
-            if dff['home_team'].isin([xaxis_column_name]):
-                goal1 = dff[dff['home_team'] == xaxis_column_name]['home_score']
-                goal2 = dff.loc[dff['home_team'] == xaxis_column_name, 'away_score']
-                name = dff[dff['home_team'] == xaxis_column_name]['away_team']
-                custom = dff[dff['home_team'] == xaxis_column_name]['away_team']
-                goal3 = dff['home_score'] - dff['away_score']
+            #making the goals match where the selected team is for home and away, and appending the lists
+            goal1 = dff[dff['home_team'] == xaxis_column_name]['home_score'].append(dff[dff['away_team'] == xaxis_column_name]['away_score'], ignore_index=True)
+            goal2 = dff.loc[dff['home_team'] == xaxis_column_name, 'away_score'].append(dff.loc[dff['away_team'] == xaxis_column_name, 'home_score'], ignore_index=True)
 
-            else:
-                goal1 = dff[dff['away_team'] == xaxis_column_name]['away_score']
-                goal2 = dff.loc[dff['away_team'] == xaxis_column_name, 'home_score']
-                name = dff[dff['away_team'] == xaxis_column_name]['home_team']
-                custom = dff[dff['away_team'] == xaxis_column_name]['home_team']
-                goal3 = dff['away_score'] - dff['home_score']
+            #to get the right name we have to do a a few things
+            #first we are removing values where it equals the xaxis_column_name
+            dff1 = dff[~dff[['home_team', 'away_team']].isin([xaxis_column_name])]
+
+            #then we get all non-null values from both cols (data we want)
+            home_null = dff1.loc[dff1['home_team'].notnull(), ['home_team']]
+            away_null = dff1.loc[dff1['away_team'].notnull(), ['away_team']]
+
+            #we then append to each other and fill the na values, custom is the same as name
+            non_null = away_null.append(home_null, ignore_index = True)
+            name = non_null['home_team'].fillna(non_null['away_team'])
+            custom =name
+
+            goal3 = goal2 - goal1
             break
-
         else:
             goal1 = dff[dff['away_team'] == xaxis_column_name]['away_score']
             goal2 = dff.loc[dff['away_team'] == xaxis_column_name, 'home_score']
@@ -179,6 +184,31 @@ def create_time_series_x(dff, dff_two, title, yaxis_column_name, xaxis_column_na
             goal_colour = goal2-goal1
             break
 
+        elif yaxis_column_name == 'All':
+            #making two lists of where the selected team is in away or home, and then appending
+            dff_1 = dff[dff['home_team'].isin([xaxis_column_name])]
+            dff_2 = dff[dff['away_team'].isin([xaxis_column_name])]
+            dff = dff_1.append(dff_2, ignore_index=True)
+
+            #making the goals match where the selected team is for home and away, and appending the lists
+            goal1 = dff[dff['home_team'] == xaxis_column_name]['home_score'].append(dff[dff['away_team'] == xaxis_column_name]['away_score'], ignore_index=True)
+            goal2 = dff.loc[dff['home_team'] == xaxis_column_name, 'away_score'].append(dff.loc[dff['away_team'] == xaxis_column_name, 'home_score'], ignore_index=True)
+
+            #to get the right name we have to do a a few things
+            #first we are removing values where it equals the xaxis_column_name
+            dff1 = dff[~dff[['home_team', 'away_team']].isin([xaxis_column_name])]
+
+            #then we get all non-null values from both cols (data we want)
+            home_null = dff1.loc[dff1['home_team'].notnull(), ['home_team']]
+            away_null = dff1.loc[dff1['away_team'].notnull(), ['away_team']]
+
+            #we then append to each other and fill the na values, custom is the same as name
+            non_null = away_null.append(home_null, ignore_index = True)
+            name = non_null['home_team'].fillna(non_null['away_team'])
+
+            goal_net = goal1-goal2
+            goal_colour = goal2-goal1
+            break
         else:
             goal1 = dff_two[dff_two['away_team'] == country_name]['away_score']
             goal2 = dff_two.loc[dff_two['away_team'] == country_name, 'home_score']
@@ -221,6 +251,32 @@ def create_time_series_y(dff, dff_two, title, yaxis_column_name, xaxis_column_na
             goal1 = dff_two[dff_two['home_team'] == xaxis_column_name]['home_score']
             goal2 = dff_two.loc[dff_two['home_team'] == xaxis_column_name, 'away_score']
             name = dff_two[dff_two['home_team'] == xaxis_column_name]['away_team']
+            goal_net = goal1-goal2
+            goal_colour = goal2-goal1
+            break
+
+        elif yaxis_column_name == 'All':
+            #making two lists of where the selected team is in away or home, and then appending
+            dff_1 = dff[dff['home_team'].isin([xaxis_column_name])]
+            dff_2 = dff[dff['away_team'].isin([xaxis_column_name])]
+            dff = dff_1.append(dff_2, ignore_index=True)
+
+            #making the goals match where the selected team is for home and away, and appending the lists
+            goal1 = dff[dff['home_team'] == xaxis_column_name]['home_score'].append(dff[dff['away_team'] == xaxis_column_name]['away_score'], ignore_index=True)
+            goal2 = dff.loc[dff['home_team'] == xaxis_column_name, 'away_score'].append(dff.loc[dff['away_team'] == xaxis_column_name, 'home_score'], ignore_index=True)
+
+            #to get the right name we have to do a a few things
+            #first we are removing values where it equals the xaxis_column_name
+            dff1 = dff[~dff[['home_team', 'away_team']].isin([xaxis_column_name])]
+
+            #then we get all non-null values from both cols (data we want)
+            home_null = dff1.loc[dff1['home_team'].notnull(), ['home_team']]
+            away_null = dff1.loc[dff1['away_team'].notnull(), ['away_team']]
+
+            #we then append to each other and fill the na values, custom is the same as name
+            non_null = away_null.append(home_null, ignore_index = True)
+            name = non_null['home_team'].fillna(non_null['away_team'])
+
             goal_net = goal1-goal2
             goal_colour = goal2-goal1
             break
@@ -270,6 +326,24 @@ def create_hth(dff, xaxis_column_name, yaxis_column_name, title):
             goal_net = goal1-goal2
             goal_colour = goal2-goal1
             break
+
+        elif yaxis_column_name == 'All':
+            #making two lists of where the selected team is in away or home, and then appending
+            dff_1 = dff[dff['home_team'].isin([xaxis_column_name])]
+            dff_2 = dff[dff['away_team'].isin([xaxis_column_name])]
+            dff = dff_1.append(dff_2, ignore_index=True)
+            dff = dff.sort_values('date')
+
+            #making the goals match where the selected team is for home and away, and appending the lists
+            goal1 = dff[dff['home_team'] == xaxis_column_name]['home_score'].append(dff[dff['away_team'] == xaxis_column_name]['away_score'], ignore_index=True)
+            goal2 = dff.loc[dff['home_team'] == xaxis_column_name, 'away_score'].append(dff.loc[dff['away_team'] == xaxis_column_name, 'home_score'], ignore_index=True)
+
+            name = dff['date']
+
+            goal_net = goal1-goal2
+            goal_colour = goal2-goal1
+            break
+
         else:
             goal1 = dff[dff['away_team'] == xaxis_column_name]['away_score']
             goal2 = dff.loc[dff['away_team'] == xaxis_column_name, 'home_score']
@@ -373,16 +447,10 @@ def update_x_timeseries(hoverData, year_value, yaxis_column_name, xaxis_column_n
 def update_hth_graph(hoverData, xaxis_column_name, yaxis_column_name):
 
     country_name = hoverData['points'][0]['customdata']
-    while True:
-        if yaxis_column_name == 'All':
-            dff_1 = df[df['home_team'].isin([xaxis_column_name, country_name])]
-            dff_2 = df[df['away_team'].isin([xaxis_column_name, country_name])]
-            dff = dff_1.append(dff_2, ignore_index=True)
-            break
-        else:
-            dff = df[df['home_team'].isin([xaxis_column_name, country_name])]
-            dff = dff[dff['away_team'].isin([xaxis_column_name, country_name])]
-            break
+
+    dff = df[df['home_team'].isin([xaxis_column_name, country_name])]
+    dff = dff[dff['away_team'].isin([xaxis_column_name, country_name])]
+
 
     title = '<b>Graph shows head to head {} games for {} versus {}</b><br> A result above 0 shows a win for the user selected team'.format(yaxis_column_name, xaxis_column_name, country_name)
 
@@ -437,5 +505,6 @@ if __name__ == '__main__':
 
 #TO DO
 #remove duplicate games in the table when you select All
-#get the All filter working on graphs, on the table it should be fine apart from bug above
 #ability to select opponent team
+#fix the all function for the two timeseries graphs
+#get data from an API
