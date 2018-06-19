@@ -102,6 +102,12 @@ def update_graph(xaxis_column_name, yaxis_column_name,
             name = dff[dff['home_team'] == xaxis_column_name]['away_team']
             custom = dff[dff['home_team'] == xaxis_column_name]['away_team']
             goal3 = dff['home_score'] - dff['away_score']
+
+            #this will help us create a dynamic diagonal line which will indicate win vs loss
+            dff_g1 = dff[dff['home_team'].isin([xaxis_column_name])]
+            dff_g2 = dff[dff['away_team'].isin([xaxis_column_name])]
+            dff_goals = dff_g1.append(dff_g2, ignore_index=True)
+            max_goals_amt = dff_goals[['home_score','away_score']].max(axis=1)
             break
 
         elif yaxis_column_name == 'All':
@@ -128,6 +134,9 @@ def update_graph(xaxis_column_name, yaxis_column_name,
             custom =name
 
             goal3 = goal2 - goal1
+
+            #this will help us create a dynamic diagonal line which will indicate win vs loss
+            max_goals_amt = dff[['home_score','away_score']].max(axis=1)
             break
         else:
             goal1 = dff[dff['away_team'] == xaxis_column_name]['away_score']
@@ -135,7 +144,15 @@ def update_graph(xaxis_column_name, yaxis_column_name,
             name = dff[dff['away_team'] == xaxis_column_name]['home_team']
             custom = dff[dff['away_team'] == xaxis_column_name]['home_team']
             goal3 = dff['away_score'] - dff['home_score']
+
+            #this will help us create a dynamic diagonal line which will indicate win vs loss
+            dff_g1 = dff[dff['home_team'].isin([xaxis_column_name])]
+            dff_g2 = dff[dff['away_team'].isin([xaxis_column_name])]
+            dff_goals = dff_g1.append(dff_g2, ignore_index=True)
+            max_goals_amt = dff_goals[['home_score','away_score']].max(axis=1)
             break
+
+
 
     title_1 = '<b>Score Matrix showing {} games for {}</b><br> Change the dropdown\'s above to modify the data shown'.format(yaxis_column_name, xaxis_column_name)
     #here, the return will return the plot we are looking for
@@ -169,7 +186,20 @@ def update_graph(xaxis_column_name, yaxis_column_name,
             annotations =    [{ 'x': 0, 'y': 0.95, 'xanchor': 'left', 'yanchor': 'bottom',
                             'xref': 'paper', 'yref': 'paper', 'showarrow': False,
                             'align': 'left', 'bgcolor': 'rgba(255, 255, 255, 0.5)',
-                            'text': title_1 }]
+                            'text': title_1 }],
+            shapes = [{
+            'type': 'line',
+            'x0': 0,
+            'y0': 0,
+            'x1': max_goals_amt.max(),
+            'y1': max_goals_amt.max(),
+            'line': {
+                'color': 'rgb(180, 180, 180)',
+                'width': 4,
+                'dash': 'dashdot',
+            },
+        }]
+
         )
     }
 #this function creates one of the timeseries graphs
@@ -186,17 +216,18 @@ def create_time_series_x(dff, dff_two, title, yaxis_column_name, xaxis_column_na
 
         elif yaxis_column_name == 'All':
             #making two lists of where the selected team is in away or home, and then appending
-            dff_1 = dff[dff['home_team'].isin([xaxis_column_name])]
-            dff_2 = dff[dff['away_team'].isin([xaxis_column_name])]
+            dff_1 = dff_two[dff_two['home_team'].isin([country_name])]
+            dff_2 = dff_two[dff_two['away_team'].isin([country_name])]
             dff = dff_1.append(dff_2, ignore_index=True)
+            dff = dff.sort_values('date')
 
             #making the goals match where the selected team is for home and away, and appending the lists
-            goal1 = dff[dff['home_team'] == xaxis_column_name]['home_score'].append(dff[dff['away_team'] == xaxis_column_name]['away_score'], ignore_index=True)
-            goal2 = dff.loc[dff['home_team'] == xaxis_column_name, 'away_score'].append(dff.loc[dff['away_team'] == xaxis_column_name, 'home_score'], ignore_index=True)
+            goal1 = dff[dff['home_team'] == country_name]['home_score'].append(dff[dff['away_team'] == country_name]['away_score'], ignore_index=True)
+            goal2 = dff.loc[dff['home_team'] == country_name, 'away_score'].append(dff.loc[dff['away_team'] == country_name, 'home_score'], ignore_index=True)
 
             #to get the right name we have to do a a few things
             #first we are removing values where it equals the xaxis_column_name
-            dff1 = dff[~dff[['home_team', 'away_team']].isin([xaxis_column_name])]
+            dff1 = dff[~dff[['home_team', 'away_team']].isin([country_name])]
 
             #then we get all non-null values from both cols (data we want)
             home_null = dff1.loc[dff1['home_team'].notnull(), ['home_team']]
@@ -257,9 +288,10 @@ def create_time_series_y(dff, dff_two, title, yaxis_column_name, xaxis_column_na
 
         elif yaxis_column_name == 'All':
             #making two lists of where the selected team is in away or home, and then appending
-            dff_1 = dff[dff['home_team'].isin([xaxis_column_name])]
-            dff_2 = dff[dff['away_team'].isin([xaxis_column_name])]
+            dff_1 = dff_two[dff_two['home_team'].isin([xaxis_column_name])]
+            dff_2 = dff_two[dff_two['away_team'].isin([xaxis_column_name])]
             dff = dff_1.append(dff_2, ignore_index=True)
+            dff = dff.sort_values('date')
 
             #making the goals match where the selected team is for home and away, and appending the lists
             goal1 = dff[dff['home_team'] == xaxis_column_name]['home_score'].append(dff[dff['away_team'] == xaxis_column_name]['away_score'], ignore_index=True)
@@ -473,18 +505,19 @@ def update_table_data(hoverData, year_value, yaxis_column_name, xaxis_column_nam
     #loop to handle Home vs Away
     while True:
         if yaxis_column_name == 'Home':
-            dff = dff[dff['home_team'].isin([xaxis_column_name, country_name])]
+            dff = dff[dff['home_team'].isin([xaxis_column_name])]
             break
         elif yaxis_column_name == 'All':
-            dff_1 = dff[dff['home_team'].isin([xaxis_column_name,country_name])]
-            dff_2 = dff[dff['away_team'].isin([xaxis_column_name,country_name])]
+            dff_1 = dff[dff['home_team'].isin([xaxis_column_name])]
+            dff_2 = dff[dff['away_team'].isin([xaxis_column_name])]
             dff = dff_1.append(dff_2, ignore_index=True)
+            dff = dff.sort_values('date')
             break
         else:
-            dff = dff[dff['away_team'].isin([xaxis_column_name, country_name])]
+            dff = dff[dff['away_team'].isin([xaxis_column_name])]
             break
     #title that will update as the graph does
-    title = '<b>Table shows all {} games for {} and {}</b><br>'.format(yaxis_column_name, xaxis_column_name, country_name)
+    title = '<b>Table shows all {} games for {} in {}</b><br>'.format(yaxis_column_name, xaxis_column_name, year_value)
     #create the table
     new_table_figure = ff.create_table(dff)
     #update margins
@@ -506,5 +539,4 @@ if __name__ == '__main__':
 #TO DO
 #remove duplicate games in the table when you select All
 #ability to select opponent team
-#fix the all function for the two timeseries graphs
 #get data from an API
