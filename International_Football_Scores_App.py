@@ -235,14 +235,15 @@ def create_time_series_x(dff, dff_two, title, yaxis_column_name, xaxis_column_na
 
             #to get the right name we have to do a a few things
             #first we are removing values where it equals the xaxis_column_name
-            dff1 = dff[~dff[['home_team', 'away_team']].isin([country_name])]
+            dff1 = dff[~dff[['home_team', 'away_team', 'date']].isin([country_name])]
 
             #then we get all non-null values from both cols (data we want)
-            home_null = dff1.loc[dff1['home_team'].notnull(), ['home_team']]
-            away_null = dff1.loc[dff1['away_team'].notnull(), ['away_team']]
+            home_null = dff1.loc[dff1['home_team'].notnull(), ('home_team','date')]
+            away_null = dff1.loc[dff1['away_team'].notnull(), ('away_team','date')]
 
             #we then append to each other and fill the na values, custom is the same as name
             non_null = away_null.append(home_null, ignore_index = True)
+            non_null = non_null.sort_values('date')
             name = non_null['home_team'].fillna(non_null['away_team'])
 
             goal_net = goal1-goal2
@@ -315,14 +316,15 @@ def create_time_series_y(dff, dff_two, title, yaxis_column_name, xaxis_column_na
 
             #to get the right name we have to do a a few things
             #first we are removing values where it equals the xaxis_column_name
-            dff1 = dff[~dff[['home_team', 'away_team']].isin([xaxis_column_name])]
+            dff1 = dff[~dff[['home_team', 'away_team', 'date']].isin([xaxis_column_name])]
 
             #then we get all non-null values from both cols (data we want)
-            home_null = dff1.loc[dff1['home_team'].notnull(), ['home_team']]
-            away_null = dff1.loc[dff1['away_team'].notnull(), ['away_team']]
+            home_null = dff1.loc[dff1['home_team'].notnull(), ('home_team','date')]
+            away_null = dff1.loc[dff1['away_team'].notnull(), ('away_team','date')]
 
             #we then append to each other and fill the na values, custom is the same as name
             non_null = away_null.append(home_null, ignore_index = True)
+            non_null = non_null.sort_values('date')
             name = non_null['home_team'].fillna(non_null['away_team'])
 
             goal_net = goal1-goal2
