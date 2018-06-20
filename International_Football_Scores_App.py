@@ -13,6 +13,7 @@ server = app.server
 
 #import the data into the script
 df = pd.read_csv('Data/results.csv')
+df_raw = df
 #convert the date to datetime, and create a new column showing just the year
 df['date'] = pd.to_datetime(df['date'])
 df['year'] = df['date'].dt.year
@@ -522,7 +523,7 @@ def update_hth_graph(hoverData, xaxis_column_name, yaxis_column_name):
     country_name = hoverData['points'][0]['customdata']
 
     #filter the dataframe where the xaxis_column_name and country name is in away or home team
-    dff = df[df['home_team'].isin([xaxis_column_name, country_name])]
+    dff = df_raw[df_raw['home_team'].isin([xaxis_column_name, country_name])]
     dff = dff[dff['away_team'].isin([xaxis_column_name, country_name])]
 
     #give simple title
