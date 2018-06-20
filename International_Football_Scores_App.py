@@ -222,8 +222,16 @@ def create_time_series_x(dff, dff_two, title, yaxis_column_name, xaxis_column_na
             dff = dff.sort_values('date')
 
             #making the goals match where the selected team is for home and away, and appending the lists
-            goal1 = dff[dff['home_team'] == country_name]['home_score'].append(dff[dff['away_team'] == country_name]['away_score'], ignore_index=True)
-            goal2 = dff.loc[dff['home_team'] == country_name, 'away_score'].append(dff.loc[dff['away_team'] == country_name, 'home_score'], ignore_index=True)
+            goal1 = dff[dff['home_team'] == country_name][['home_score','date']].append(dff[dff['away_team'] == country_name][['away_score','date']], ignore_index=True)
+            goal2 = dff.loc[dff['home_team'] == country_name, ('away_score','date')].append(dff.loc[dff['away_team'] == country_name, ('home_score','date')], ignore_index=True)
+
+            #sortig the values by date
+            goal1 = goal1.sort_values('date')
+            goal2 = goal2.sort_values('date')
+
+            #filling na's to make it into a series
+            goal1 = goal1['away_score'].fillna(goal1['home_score'])
+            goal2 = goal2['away_score'].fillna(goal2['home_score'])
 
             #to get the right name we have to do a a few things
             #first we are removing values where it equals the xaxis_column_name
@@ -294,8 +302,16 @@ def create_time_series_y(dff, dff_two, title, yaxis_column_name, xaxis_column_na
             dff = dff.sort_values('date')
 
             #making the goals match where the selected team is for home and away, and appending the lists
-            goal1 = dff[dff['home_team'] == xaxis_column_name]['home_score'].append(dff[dff['away_team'] == xaxis_column_name]['away_score'], ignore_index=True)
-            goal2 = dff.loc[dff['home_team'] == xaxis_column_name, 'away_score'].append(dff.loc[dff['away_team'] == xaxis_column_name, 'home_score'], ignore_index=True)
+            goal1 = dff[dff['home_team'] == xaxis_column_name][['home_score','date']].append(dff[dff['away_team'] == xaxis_column_name][['away_score','date']], ignore_index=True)
+            goal2 = dff.loc[dff['home_team'] == xaxis_column_name, ('away_score','date')].append(dff.loc[dff['away_team'] == xaxis_column_name, ('home_score','date')], ignore_index=True)
+
+            #sortig the values by date
+            goal1 = goal1.sort_values('date')
+            goal2 = goal2.sort_values('date')
+
+            #filling na's to make it into a series
+            goal1 = goal1['away_score'].fillna(goal1['home_score'])
+            goal2 = goal2['away_score'].fillna(goal2['home_score'])
 
             #to get the right name we have to do a a few things
             #first we are removing values where it equals the xaxis_column_name
@@ -367,8 +383,16 @@ def create_hth(dff, xaxis_column_name, yaxis_column_name, title):
             dff = dff.sort_values('date')
 
             #making the goals match where the selected team is for home and away, and appending the lists
-            goal1 = dff[dff['home_team'] == xaxis_column_name]['home_score'].append(dff[dff['away_team'] == xaxis_column_name]['away_score'], ignore_index=True)
-            goal2 = dff.loc[dff['home_team'] == xaxis_column_name, 'away_score'].append(dff.loc[dff['away_team'] == xaxis_column_name, 'home_score'], ignore_index=True)
+            goal1 = dff[dff['home_team'] == xaxis_column_name][['home_score','date']].append(dff[dff['away_team'] == xaxis_column_name][['away_score','date']], ignore_index=True)
+            goal2 = dff.loc[dff['home_team'] == xaxis_column_name, ('away_score','date')].append(dff.loc[dff['away_team'] == xaxis_column_name, ('home_score','date')], ignore_index=True)
+
+            #sortig the values by date
+            goal1 = goal1.sort_values('date')
+            goal2 = goal2.sort_values('date')
+
+            #filling na's to make it into a series
+            goal1 = goal1['away_score'].fillna(goal1['home_score'])
+            goal2 = goal2['away_score'].fillna(goal2['home_score'])
 
             name = dff['date']
 
@@ -458,6 +482,7 @@ def update_x_timeseries(hoverData, year_value, yaxis_column_name, xaxis_column_n
     #this means that as we move through the graph the info updates
     country_name = hoverData['points'][0]['customdata']
 
+    #filter dataframe based on the axis input
     while True:
         if yaxis_column_name == 'Home':
             dff = dff[dff['home_team'] == country_name]
@@ -480,11 +505,12 @@ def update_hth_graph(hoverData, xaxis_column_name, yaxis_column_name):
 
     country_name = hoverData['points'][0]['customdata']
 
+    #filter the dataframe where the xaxis_column_name and country name is in away or home team
     dff = df[df['home_team'].isin([xaxis_column_name, country_name])]
     dff = dff[dff['away_team'].isin([xaxis_column_name, country_name])]
 
-
-    title = '<b>Graph shows head to head {} games for {} versus {}</b><br> A result above 0 shows a win for the user selected team'.format(yaxis_column_name, xaxis_column_name, country_name)
+    #give simple title
+    title = '<b>Graph shows {} head to head games for {} versus {}</b><br> A result above 0 shows a win for the user selected team'.format(yaxis_column_name, xaxis_column_name, country_name)
 
     return create_hth(dff, xaxis_column_name, yaxis_column_name, title)
 
