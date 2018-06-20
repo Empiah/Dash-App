@@ -9,6 +9,8 @@ import plotly.figure_factory as ff
 
 app = dash.Dash()
 
+server = app.server
+
 #import the data into the script
 df = pd.read_csv('Data/results.csv')
 #convert the date to datetime, and create a new column showing just the year
@@ -176,9 +178,11 @@ def update_graph(xaxis_column_name, yaxis_column_name,
         'layout': go.Layout(
             xaxis={
                 'title': xaxis_column_name,
+                'hoverformat' : '.0f'
             },
             yaxis={
-                'title': 'Opponent'
+                'title': 'Opponent',
+                'hoverformat' : '.0f'
             },
             margin={'l': 40, 'b': 30, 't': 10, 'r': 0},
             height=450,
@@ -578,3 +582,4 @@ if __name__ == '__main__':
 #remove duplicate games in the table when you select All
 #ability to select opponent team
 #get data from an API
+#filter on tournament data
