@@ -1,1 +1,1 @@
-web: gunicorn International_Football_Scores:server --timeout 300
+web: gunicorn International_Football_Scores_App:server --timeout 300
