@@ -14,15 +14,33 @@ server = app.server
 #import the data into the script
 df = pd.read_csv('Data/results.csv')
 df_raw = df
+
 #convert the date to datetime, and create a new column showing just the year
 df['date'] = pd.to_datetime(df['date'])
 df['year'] = df['date'].dt.year
+
 #there is a lot of data so lets remove anything before 1975
 df = df[df['date'].dt.year >= 1975]
+
+#what we need to do here is plan for scores that are the sameself.
+#to show them all properly, I will add small random value to the columns that hold the scores
+#this will mean when you hover over, both will appear
+
+#this adds a column with a random value
+df['random'] = np.random.uniform(0.03,0,len(df))
+
+#this copies the original columns
+df['home_score1'] = df['home_score']
+df['away_score1'] = df['away_score']
+
+#this changes the existing columns and adds the value in the random column
+df['home_score'] = df['home_score'] + df['random']
+df['away_score'] = df['away_score'] + df['random']
 
 #this will be the list of indicators that are available to select in drop downs
 available_indicators_teams = np.sort(df['home_team'].unique())
 available_indicators_homeaway = ['Home', 'Away', 'All']
+available_indicators_tourny = np.sort(df['tournament'].unique())
 
 #in here we start to define the outline of our app and get it define how it looks
 #the order that it is in is how it will appear
@@ -104,7 +122,6 @@ def update_graph(xaxis_column_name, yaxis_column_name,
             goal2 = dff.loc[dff['home_team'] == xaxis_column_name, 'away_score']
             name = dff[dff['home_team'] == xaxis_column_name]['away_team']
             custom = dff[dff['home_team'] == xaxis_column_name]['away_team']
-            goal3 = dff['home_score'] - dff['away_score']
 
             #this will help us create a dynamic diagonal line which will indicate win vs loss
             dff_g1 = dff[dff['home_team'].isin([xaxis_column_name])]
@@ -134,9 +151,7 @@ def update_graph(xaxis_column_name, yaxis_column_name,
             #we then append to each other and fill the na values, custom is the same as name
             non_null = away_null.append(home_null, ignore_index = True)
             name = non_null['home_team'].fillna(non_null['away_team'])
-            custom =name
-
-            goal3 = goal2 - goal1
+            custom = name
 
             #this will help us create a dynamic diagonal line which will indicate win vs loss
             max_goals_amt = dff[['home_score','away_score']].max(axis=1)
@@ -146,7 +161,6 @@ def update_graph(xaxis_column_name, yaxis_column_name,
             goal2 = dff.loc[dff['away_team'] == xaxis_column_name, 'home_score']
             name = dff[dff['away_team'] == xaxis_column_name]['home_team']
             custom = dff[dff['away_team'] == xaxis_column_name]['home_team']
-            goal3 = dff['away_score'] - dff['home_score']
 
             #this will help us create a dynamic diagonal line which will indicate win vs loss
             dff_g1 = dff[dff['home_team'].isin([xaxis_column_name])]
@@ -544,7 +558,7 @@ def update_table_data(hoverData, year_value, yaxis_column_name, xaxis_column_nam
     dff = df[df['year'] == year_value]
     country_name = hoverData['points'][0]['customdata']
     #these columns are not needed so lets remove them
-    dff.drop(['neutral', 'year'], axis=1, inplace=True)
+    dff.drop(['neutral', 'year','random', 'home_score', 'away_score'], axis=1, inplace=True)
     #loop to handle Home vs Away
     while True:
         if yaxis_column_name == 'Home':
@@ -583,3 +597,5 @@ if __name__ == '__main__':
 #ability to select opponent team
 #get data from an API
 #filter on tournament data
+#fix issue when two matches have the same scores
+#rename columns
