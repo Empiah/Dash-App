@@ -563,15 +563,24 @@ def update_table_data(hoverData, year_value, yaxis_column_name, xaxis_column_nam
     while True:
         if yaxis_column_name == 'Home':
             dff = dff[dff['home_team'].isin([xaxis_column_name])]
+            dff.rename({'home_score1': 'Home Score', 'away_score1': 'Away Score',
+                        'date': 'Date', 'home_team': 'Home Team', 'away_team': 'Away Team',
+                        'tournament':'Tournament', 'city': 'City', 'country': 'Country'}, axis=1, inplace=True)
             break
         elif yaxis_column_name == 'All':
             dff_1 = dff[dff['home_team'].isin([xaxis_column_name])]
             dff_2 = dff[dff['away_team'].isin([xaxis_column_name])]
             dff = dff_1.append(dff_2, ignore_index=True)
             dff = dff.sort_values('date')
+            dff.rename({'home_score1': 'Home Score', 'away_score1': 'Away Score',
+                        'date': 'Date', 'home_team': 'Home Team', 'away_team': 'Away Team',
+                        'tournament':'Tournament', 'city': 'City', 'country': 'Country'}, axis=1, inplace=True)
             break
         else:
             dff = dff[dff['away_team'].isin([xaxis_column_name])]
+            dff.rename({'home_score1': 'Home Score', 'away_score1': 'Away Score',
+                        'date': 'Date', 'home_team': 'Home Team', 'away_team': 'Away Team',
+                        'tournament':'Tournament', 'city': 'City', 'country': 'Country'}, axis=1, inplace=True)
             break
     #title that will update as the graph does
     title = '<b>Table shows all {} games for {} in {}</b><br>'.format(yaxis_column_name, xaxis_column_name, year_value)
@@ -597,5 +606,3 @@ if __name__ == '__main__':
 #ability to select opponent team
 #get data from an API
 #filter on tournament data
-#fix issue when two matches have the same scores
-#rename columns
