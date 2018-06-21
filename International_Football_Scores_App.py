@@ -490,7 +490,7 @@ def update_y_timeseries(hoverData, year_value, yaxis_column_name, xaxis_column_n
             dff = dff[dff['away_team'] == country_name]
             break
     #giving it a nice adaptive title
-    title = '<b>{} {} Results</b><br>Net Goals - Above Zero Equals a Win, Below Equals a Loss'.format(country_name, yaxis_column_name)
+    title = '<b>{} {} Results in {}</b><br>Net Goals - Above Zero Equals a Win, Below Equals a Loss'.format(country_name, yaxis_column_name, year_value)
     return create_time_series_y(dff, dff_two, title, yaxis_column_name, xaxis_column_name)
 
 
@@ -523,7 +523,7 @@ def update_x_timeseries(hoverData, year_value, yaxis_column_name, xaxis_column_n
             dff = dff[dff['away_team'] == country_name]
             break
 
-    title = '<b>{} {} Results</b><br>Net Goals - Above Zero Equals a Win, Below Equals a Loss'.format(country_name,yaxis_column_name)
+    title = '<b>{} {} Results in {}</b><br>Net Goals - Above Zero Equals a Win, Below Equals a Loss'.format(country_name,yaxis_column_name, year_value)
     return create_time_series_x(dff, dff_two, title, yaxis_column_name, xaxis_column_name, country_name)
 
 
