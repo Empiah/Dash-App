@@ -580,7 +580,6 @@ if __name__ == '__main__':
 
 
 #TO DO
-#remove duplicate games in the table when you select All
 #ability to select opponent team
 #get data from an API
 #filter on tournament data
