@@ -22,7 +22,7 @@ df['year'] = df['date'].dt.year
 #there is a lot of data so lets remove anything before 1975
 df = df[df['date'].dt.year >= 1975]
 
-#what we need to do here is plan for scores that are the sameself.
+#what we need to do here is plan for scores that are the same.
 #to show them all properly, I will add small random value to the columns that hold the scores
 #this will mean when you hover over, both will appear
 
