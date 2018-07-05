@@ -265,10 +265,12 @@ def create_time_series_x(dff, dff_two, title, yaxis_column_name, xaxis_column_na
             non_null = non_null.sort_values('date')
             name = non_null['home_team'].fillna(non_null['away_team'])
 
+            #goal net is obviously the net of the goals scores and the colour is based off this too
             goal_net = goal1-goal2
             goal_colour = goal2-goal1
             break
         else:
+            #this does a similiar thing as is shown above, but if the dropdown is set too away
             goal1 = dff_two[dff_two['away_team'] == country_name]['away_score']
             goal2 = dff_two.loc[dff_two['away_team'] == country_name, 'home_score']
             name = dff_two[dff_two['away_team'] == country_name]['home_team']
@@ -346,11 +348,13 @@ def create_time_series_y(dff, dff_two, title, yaxis_column_name, xaxis_column_na
             non_null = non_null.sort_values('date')
             name = non_null['home_team'].fillna(non_null['away_team'])
 
+            #net goals and the same is used for the colour
             goal_net = goal1-goal2
             goal_colour = goal2-goal1
             break
 
         else:
+            #this does a similiar thing as the above but if the dropdown is set to away
             goal1 = dff_two[dff_two['away_team'] == xaxis_column_name]['away_score']
             goal2 = dff_two.loc[dff_two['away_team'] == xaxis_column_name, 'home_score']
             name = dff_two[dff_two['away_team'] == xaxis_column_name]['home_team']
@@ -561,6 +565,7 @@ def update_table_data(hoverData, year_value, yaxis_column_name, xaxis_column_nam
     dff.drop(['neutral', 'year','random', 'home_score', 'away_score'], axis=1, inplace=True)
     #loop to handle Home vs Away
     while True:
+        #this will rename some of the columns to make them more appealing
         if yaxis_column_name == 'Home':
             dff = dff[dff['home_team'].isin([xaxis_column_name])]
             dff.rename({'home_score1': 'Home Score', 'away_score1': 'Away Score',
@@ -568,6 +573,8 @@ def update_table_data(hoverData, year_value, yaxis_column_name, xaxis_column_nam
                         'tournament':'Tournament', 'city': 'City', 'country': 'Country'}, axis=1, inplace=True)
             break
         elif yaxis_column_name == 'All':
+            #if all is picked, we need to correctly choose the data that we want to show. I have created two tables
+            #and appended them, then we rename
             dff_1 = dff[dff['home_team'].isin([xaxis_column_name])]
             dff_2 = dff[dff['away_team'].isin([xaxis_column_name])]
             dff = dff_1.append(dff_2, ignore_index=True)
@@ -577,6 +584,7 @@ def update_table_data(hoverData, year_value, yaxis_column_name, xaxis_column_nam
                         'tournament':'Tournament', 'city': 'City', 'country': 'Country'}, axis=1, inplace=True)
             break
         else:
+            #this does a similiar thing to what is done for home
             dff = dff[dff['away_team'].isin([xaxis_column_name])]
             dff.rename({'home_score1': 'Home Score', 'away_score1': 'Away Score',
                         'date': 'Date', 'home_team': 'Home Team', 'away_team': 'Away Team',
