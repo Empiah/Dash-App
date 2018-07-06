@@ -545,7 +545,7 @@ def update_hth_graph(hoverData, xaxis_column_name, yaxis_column_name):
     dff = dff[dff['away_team'].isin([xaxis_column_name, country_name])]
 
     #give simple title
-    title = '<b>Graph shows {} head to head games for {} versus {}</b><br> A result above 0 shows a win for the user selected team'.format(yaxis_column_name, xaxis_column_name, country_name)
+    title = '<b>Graph shows {} head to head games for {} versus {}</b><br> Net Goals - A result above 0 shows a win for the user selected team'.format(yaxis_column_name, xaxis_column_name, country_name)
 
     return create_hth(dff, xaxis_column_name, yaxis_column_name, title)
 
