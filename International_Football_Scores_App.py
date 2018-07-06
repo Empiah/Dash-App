@@ -87,7 +87,7 @@ app.layout = html.Div([
         html.Div([
             dcc.Graph(
             id='result_scatter',
-            hoverData={'points': [{'customdata':'Italy'}]}
+            hoverData={'points': [{'customdata':'Sweden'}]}
             )
         ], style={'width': '49%', 'display': 'inline-block', 'padding': '0 20'}),
         #these charts will be on the side and there is two, they will show timeseries dataa
