@@ -64,7 +64,7 @@ app.layout = html.Div([
                 dcc.Dropdown(
                     id='yaxis-column',
                     options=[{'label': i, 'value': i} for i in available_indicators_homeaway],
-                    value='Home'
+                    value='All'
                 ),
             ],
             style={'width': '23%', 'float': 'right', 'display': 'inline-block'})
@@ -88,7 +88,7 @@ app.layout = html.Div([
         html.Div([
             dcc.Graph(
             id='result_scatter',
-            hoverData={'points': [{'customdata':'Italy'}]}
+            hoverData={'points': [{'customdata':'France'}]}
             )
         ], style={'width': '49%', 'display': 'inline-block', 'padding': '0 20'}),
         #these charts will be on the side and there is two, they will show timeseries dataa
@@ -546,7 +546,7 @@ def update_hth_graph(hoverData, xaxis_column_name, yaxis_column_name):
     dff = dff[dff['away_team'].isin([xaxis_column_name, country_name])]
 
     #give simple title
-    title = '<b>Graph shows {} head to head games for {} versus {}</b><br> A result above 0 shows a win for the user selected team'.format(yaxis_column_name, xaxis_column_name, country_name)
+    title = '<b>Graph shows {} head to head games for {} versus {}</b><br> Net Goals - A result above 0 shows a win for the user selected team'.format(yaxis_column_name, xaxis_column_name, country_name)
 
     return create_hth(dff, xaxis_column_name, yaxis_column_name, title)
 
