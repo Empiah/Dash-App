@@ -33,7 +33,8 @@ df['random'] = np.random.uniform(0.03,0,len(df))
 df['home_score1'] = df['home_score']
 df['away_score1'] = df['away_score']
 
-#this changes the existing columns and adds the value in the random column
+#this changes the existing columns and adds the value in the random column this basically means
+#if there are two of the same score, they both appear
 df['home_score'] = df['home_score'] + df['random']
 df['away_score'] = df['away_score'] + df['random']
 
