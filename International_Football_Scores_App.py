@@ -63,7 +63,7 @@ app.layout = html.Div([
                 dcc.Dropdown(
                     id='yaxis-column',
                     options=[{'label': i, 'value': i} for i in available_indicators_homeaway],
-                    value='Home'
+                    value='All'
                 ),
             ],
             style={'width': '23%', 'float': 'right', 'display': 'inline-block'})
